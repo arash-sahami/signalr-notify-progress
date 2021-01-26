@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { HubConnectionBuilder, HubConnection, LogLevel } from '@aspnet/signalr';
+import { HubConnection, HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
 import { TaskService } from './services/task.service';
 
 @Component({

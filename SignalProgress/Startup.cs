@@ -19,45 +19,36 @@ namespace SignalProgress
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            // CORS (before MVC)
+            services.AddControllers();
             services.AddCors(o => o.AddPolicy("CorsPolicy", builder =>
             {
-                builder.AllowAnyMethod()
-                    .AllowAnyHeader()
-                    // https://github.com/aspnet/SignalR/issues/2110 for AllowCredentials
-                    .AllowCredentials()
-                    .WithOrigins("http://localhost:4200");
+                builder
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials()
+                .SetIsOriginAllowed((host) => true);
             }));
-            // SignalR
-            services.AddSignalR();
 
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddSignalR(config => config.EnableDetailedErrors = true);
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
-            else
-            {
-                // The default HSTS value is 30 days.
-                // You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                app.UseHsts();
-            }
-
-            // CORS (before MVC)
             app.UseCors("CorsPolicy");
-            // SignalR: add to the API at route "/progress"
-            app.UseSignalR(routes =>
+            app.UseDeveloperExceptionPage();
+
+            app.UseRouting();
+
+
+            app.UseEndpoints(endpoints =>
             {
-                routes.MapHub<ProgressHub>("/progress");
+                endpoints.MapControllers();
+                endpoints.MapHub<ProgressHub>("/progress");
             });
 
-            app.UseHttpsRedirection();
-            app.UseMvc();
+            // CORS (before MVC)
         }
     }
 }
